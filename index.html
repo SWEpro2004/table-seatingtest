@@ -3,106 +3,244 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Find Your Table</title>
+
+  <title>Wedding Table Finder</title>
 
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@400;500;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, #e7eee5 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #f1e5d3 0%, transparent 35%),
+        #faf8f3;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
+      padding: 25px;
+      color: #3f493f;
     }
 
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 50px 35px;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-radius: 4px;
+      box-shadow: 0 15px 45px rgba(65, 75, 65, 0.12);
+      border: 1px solid #e4dfd4;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative corners */
+    .card::before,
+    .card::after {
+      content: "❦";
+      position: absolute;
+      color: #a5b39f;
+      font-size: 55px;
+      opacity: 0.45;
+    }
+
+    .card::before {
+      top: 8px;
+      left: 15px;
+    }
+
+    .card::after {
+      bottom: 8px;
+      right: 15px;
+      transform: rotate(180deg);
+    }
+
+    .small-title {
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      font-size: 11px;
+      color: #9a8060;
+      margin-bottom: 12px;
     }
 
     h1 {
-      margin-bottom: 10px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 52px;
+      font-weight: 500;
+      line-height: 0.95;
+      margin: 0;
+      color: #465144;
+    }
+
+    .divider {
+      margin: 22px auto;
+      color: #b49a72;
+      font-size: 20px;
+      letter-spacing: 8px;
+    }
+
+    .instruction {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14px;
+      color: #777b73;
+      margin-bottom: 20px;
     }
 
     input {
       width: 100%;
-      box-sizing: border-box;
-      padding: 14px;
-      margin: 20px 0 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      padding: 16px 18px;
+      border: 1px solid #d8d5cc;
+      background: #fdfcf9;
+      border-radius: 2px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      color: #444;
+      outline: none;
+      text-align: center;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #9da994;
+      box-shadow: 0 0 0 3px rgba(157, 169, 148, 0.12);
+    }
+
+    input::placeholder {
+      color: #aaa9a2;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      background: #222;
+      margin-top: 12px;
+      padding: 16px;
+      background: #687563;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 16px;
+      border-radius: 2px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
       cursor: pointer;
+      transition: 0.2s;
     }
 
     button:hover {
-      background: #444;
+      background: #566250;
     }
 
     #result {
-      margin-top: 25px;
-      font-size: 24px;
-      font-weight: bold;
+      margin-top: 30px;
+      min-height: 70px;
+    }
+
+    .table-label {
+      font-family: 'Montserrat', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 11px;
+      color: #9a8060;
+      margin-bottom: 5px;
+    }
+
+    .table-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 65px;
+      line-height: 1;
+      color: #465144;
+      font-weight: 600;
     }
 
     .error {
-      color: #d00;
-      font-size: 16px;
+      font-family: 'Montserrat', sans-serif;
+      color: #a45c54;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-style: italic;
+      color: #8a8d85;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 42px 25px;
+      }
+
+      h1 {
+        font-size: 44px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
-    <h1>Find Your Table</h1>
-    <p>Enter your name below</p>
+  <div class="card">
+
+    <div class="small-title">Welcome to our celebration</div>
+
+    <h1>Find Your<br>Table</h1>
+
+    <div class="divider">✦ ❦ ✦</div>
+
+    <div class="instruction">
+      Please enter your name below
+    </div>
 
     <input
       type="text"
       id="nameInput"
-      placeholder="Your name"
+      placeholder="Your full name"
       autocomplete="off"
     >
 
-    <button onclick="findTable()">Find My Table</button>
+    <button onclick="findTable()">
+      Find My Table
+    </button>
 
     <div id="result"></div>
+
+    <div class="footer">
+      We can't wait to celebrate with you
+    </div>
+
   </div>
 
   <script>
+
     const spreadsheetId = "1_ZvRtd3DyjuwzDIJmdGdNLIgW8kEH1siYH_srOFuXCU";
 
     async function findTable() {
+
       const nameInput = document.getElementById("nameInput");
       const result = document.getElementById("result");
 
       const searchName = nameInput.value.trim().toLowerCase();
 
       if (!searchName) {
-        result.innerHTML = '<div class="error">Please enter your name.</div>';
+        result.innerHTML =
+          '<div class="error">Please enter your name.</div>';
         return;
       }
 
-      result.innerHTML = "Looking up...";
+      result.innerHTML =
+        '<div class="instruction">Finding your table...</div>';
 
       try {
+
         const url =
           `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:csv`;
 
@@ -112,37 +250,51 @@
         const rows = csv
           .trim()
           .split("\n")
-          .map(row => row.split(",").map(cell =>
-            cell.replace(/^"|"$/g, "").trim()
-          ));
+          .map(row =>
+            row.split(",").map(cell =>
+              cell.replace(/^"|"$/g, "").trim()
+            )
+          );
 
-        // Skip the header row
         const data = rows.slice(1);
 
         const person = data.find(row =>
-          row[0] && row[0].toLowerCase() === searchName
+          row[0] &&
+          row[0].toLowerCase() === searchName
         );
 
         if (person) {
-          result.innerHTML = `Your table is <strong>${person[1]}</strong>`;
+
+          result.innerHTML = `
+            <div class="table-label">Your table is</div>
+            <div class="table-number">${person[1]}</div>
+          `;
+
         } else {
+
           result.innerHTML =
-            '<div class="error">Sorry, we couldn\'t find your name.</div>';
+            '<div class="error">We couldn\'t find your name.<br>Please check the spelling and try again.</div>';
+
         }
 
       } catch (error) {
+
         console.error(error);
+
         result.innerHTML =
-          '<div class="error">Something went wrong. Please try again.</div>';
+          '<div class="error">Something went wrong.<br>Please try again.</div>';
+
       }
     }
 
-    // Allow pressing Enter instead of clicking the button
     document.getElementById("nameInput").addEventListener("keydown", function(event) {
+
       if (event.key === "Enter") {
         findTable();
       }
+
     });
+
   </script>
 
 </body>
