@@ -1,148 +1,1151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Find Your Table</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    font-family: Georgia, "Times New Roman", serif;
-    background:
-      radial-gradient(circle at top, rgba(255,255,255,.16), transparent 35%),
-      linear-gradient(135deg, #6d1f2f, #9d3f4e 50%, #4d1421);
-    color: #fff;
-  }
-  .card {
-    width: min(560px, 100%);
-    padding: 42px 30px;
-    text-align: center;
-    background: rgba(255,255,255,.96);
-    color: #34131b;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.28);
-  }
-  .ornament { font-size: 30px; margin-bottom: 8px; }
-  h1 { margin: 0; font-size: clamp(32px, 8vw, 52px); }
-  .subtitle {
-    margin: 10px 0 28px;
-    font-family: Arial, sans-serif;
-    color: #6d5660;
-  }
-  input {
-    width: 100%;
-    padding: 17px 18px;
-    border: 2px solid #e2c8ce;
-    border-radius: 12px;
-    font-size: 18px;
-    outline: none;
-  }
-  input:focus { border-color: #9d3f4e; }
-  button {
-    width: 100%;
-    margin-top: 12px;
-    padding: 16px;
-    border: 0;
-    border-radius: 12px;
-    background: #7f2638;
-    color: white;
-    font-size: 17px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  button:hover { background: #681d2d; }
-  #result {
-    margin-top: 24px;
-    min-height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .found {
-    width: 100%;
-    padding: 22px;
-    border-radius: 16px;
-    background: #f8e9ed;
-  }
-  .found .name { font-size: 21px; }
-  .table {
-    margin-top: 6px;
-    font-size: 42px;
-    font-weight: bold;
-    color: #7f2638;
-  }
-  .error {
-    color: #a52a3e;
-    font-family: Arial, sans-serif;
-    font-weight: 600;
-  }
-  .hint {
-    margin-top: 24px;
-    color: #8a747b;
-    font: 13px Arial, sans-serif;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Find Your Table</title>
+
+  <!-- Excel reader -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --background: #f7f4ef;
+      --card: #ffffff;
+      --text: #292722;
+      --muted: #77736b;
+      --accent: #8b6f47;
+      --accent-dark: #6f5635;
+      --border: #e5dfd5;
+      --success: #496b4a;
+      --error: #9b4b4b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top,
+          #ffffff 0%,
+          var(--background) 60%
+        );
+
+      color: var(--text);
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .card {
+      background: var(--card);
+
+      border: 1px solid var(--border);
+
+      border-radius: 28px;
+
+      padding: 48px 42px;
+
+      box-shadow:
+        0 20px 60px rgba(50, 40, 25, 0.08);
+
+      text-align: center;
+    }
+
+    /* --------------------------------
+       Header
+    -------------------------------- */
+
+    .small-heading {
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(38px, 8vw, 58px);
+
+      font-weight: 400;
+
+      letter-spacing: -1px;
+    }
+
+    .intro {
+      color: var(--muted);
+
+      font-size: 17px;
+
+      line-height: 1.6;
+
+      margin:
+        18px
+        auto
+        34px;
+
+      max-width: 430px;
+    }
+
+    /* --------------------------------
+       Upload
+    -------------------------------- */
+
+    .upload-section {
+      margin-top: 20px;
+    }
+
+    .upload-button {
+      display: inline-flex;
+
+      align-items: center;
+      justify-content: center;
+
+      width: 100%;
+
+      padding: 17px 20px;
+
+      background: var(--accent);
+
+      color: white;
+
+      border-radius: 13px;
+
+      font-size: 16px;
+
+      font-weight: 600;
+
+      cursor: pointer;
+
+      transition: 0.2s ease;
+    }
+
+    .upload-button:hover {
+      background: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 12px;
+
+      color: var(--muted);
+
+      font-size: 13px;
+    }
+
+    /* --------------------------------
+       Search
+    -------------------------------- */
+
+    .search-section {
+      display: none;
+
+      margin-top: 20px;
+    }
+
+    .search-title {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 28px;
+
+      margin-bottom: 8px;
+    }
+
+    .search-subtitle {
+      color: var(--muted);
+
+      margin-bottom: 24px;
+    }
+
+    .search-box {
+      position: relative;
+    }
+
+    #nameInput {
+      width: 100%;
+
+      padding: 19px 20px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius: 14px;
+
+      font-size: 18px;
+
+      color: var(--text);
+
+      outline: none;
+
+      background: #fff;
+
+      transition: 0.2s ease;
+    }
+
+    #nameInput:focus {
+      border-color: var(--accent);
+
+      box-shadow:
+        0 0 0 4px
+        rgba(139, 111, 71, 0.10);
+    }
+
+    /* --------------------------------
+       Suggestions
+    -------------------------------- */
+
+    .suggestions {
+      display: none;
+
+      position: absolute;
+
+      top: calc(100% + 8px);
+
+      left: 0;
+
+      right: 0;
+
+      background: white;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius: 14px;
+
+      overflow: hidden;
+
+      box-shadow:
+        0 12px 30px
+        rgba(0, 0, 0, 0.10);
+
+      z-index: 10;
+
+      text-align: left;
+    }
+
+    .suggestion {
+      padding: 15px 18px;
+
+      cursor: pointer;
+
+      border-bottom:
+        1px solid
+        var(--border);
+
+      font-size: 16px;
+
+      transition: background 0.15s;
+    }
+
+    .suggestion:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion:hover {
+      background: #f8f5ef;
+    }
+
+    /* --------------------------------
+       Result
+    -------------------------------- */
+
+    .result {
+      display: none;
+
+      margin-top: 30px;
+
+      padding: 34px 20px;
+
+      border-radius: 20px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f5f1e9,
+          #fbfaf7
+        );
+
+      border:
+        1px solid
+        var(--border);
+
+      animation:
+        resultAppear
+        0.35s
+        ease;
+    }
+
+    @keyframes resultAppear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-name {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: 25px;
+
+      margin-bottom: 12px;
+    }
+
+    .result-label {
+      color: var(--muted);
+
+      font-size: 14px;
+
+      text-transform: uppercase;
+
+      letter-spacing: 2px;
+    }
+
+    .table-number {
+      font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+      font-size: clamp(75px, 18vw, 120px);
+
+      line-height: 1;
+
+      color: var(--accent);
+
+      margin:
+        12px
+        0
+        8px;
+
+      font-weight: 400;
+    }
+
+    .result-message {
+      color: var(--muted);
+
+      font-size: 15px;
+    }
+
+    /* --------------------------------
+       Buttons
+    -------------------------------- */
+
+    .button {
+      border: none;
+
+      cursor: pointer;
+
+      border-radius: 12px;
+
+      padding: 15px 20px;
+
+      font-size: 16px;
+
+      font-weight: 600;
+    }
+
+    .start-again {
+      width: 100%;
+
+      margin-top: 18px;
+
+      background: #292722;
+
+      color: white;
+    }
+
+    .start-again:hover {
+      background: #151411;
+    }
+
+    /* --------------------------------
+       Error
+    -------------------------------- */
+
+    .error {
+      display: none;
+
+      margin-top: 18px;
+
+      padding: 15px;
+
+      border-radius: 12px;
+
+      background: #fff4f4;
+
+      color: var(--error);
+
+      border:
+        1px solid
+        #efd0d0;
+
+      font-size: 15px;
+
+      line-height: 1.5;
+    }
+
+    /* --------------------------------
+       Footer
+    -------------------------------- */
+
+    .footer {
+      margin-top: 26px;
+
+      color: #aaa59c;
+
+      font-size: 12px;
+
+      line-height: 1.5;
+    }
+
+    /* --------------------------------
+       Mobile
+    -------------------------------- */
+
+    @media (max-width: 520px) {
+
+      body {
+        padding: 14px;
+      }
+
+      .card {
+        padding:
+          38px
+          22px;
+
+        border-radius: 22px;
+      }
+
+      .intro {
+        font-size: 16px;
+      }
+
+      .search-title {
+        font-size: 25px;
+      }
+
+    }
+  </style>
 </head>
+
 <body>
-  <main class="card">
-    <div class="ornament">✦</div>
-    <h1>Find Your Table</h1>
-    <p class="subtitle">Enter your name below to find your table.</p>
 
-    <form id="lookupForm">
-      <input id="nameInput" type="text" placeholder="Enter your name" autocomplete="off" autofocus>
-      <button type="submit">Find My Table</button>
-    </form>
+  <main class="container">
 
-    <div id="result" aria-live="polite"></div>
-    <div class="hint">8 seating entries loaded from the spreadsheet</div>
+    <section class="card">
+
+      <!-- Header -->
+
+      <div class="small-heading">
+        Welcome
+      </div>
+
+      <h1>
+        Find Your Table
+      </h1>
+
+      <p class="intro">
+        Enter your name below and we'll show you
+        where you're seated.
+      </p>
+
+
+      <!-- Upload -->
+
+      <div
+        class="upload-section"
+        id="uploadSection"
+      >
+
+        <label
+          class="upload-button"
+          for="fileInput"
+        >
+          Upload Seating List
+        </label>
+
+        <input
+          id="fileInput"
+          type="file"
+          accept=".xlsx,.xls,.csv"
+        >
+
+        <div
+          class="file-name"
+          id="fileName"
+        ></div>
+
+      </div>
+
+
+      <!-- Search -->
+
+      <div
+        class="search-section"
+        id="searchSection"
+      >
+
+        <div class="search-title">
+          What's your name?
+        </div>
+
+        <div class="search-subtitle">
+          Start typing to find your seat.
+        </div>
+
+
+        <div class="search-box">
+
+          <input
+            id="nameInput"
+            type="text"
+            placeholder="Enter your name"
+            autocomplete="off"
+          >
+
+          <div
+            class="suggestions"
+            id="suggestions"
+          ></div>
+
+        </div>
+
+
+        <!-- Result -->
+
+        <div
+          class="result"
+          id="result"
+        >
+
+          <div
+            class="result-name"
+            id="resultName"
+          ></div>
+
+          <div class="result-label">
+            Your table
+          </div>
+
+          <div
+            class="table-number"
+            id="tableNumber"
+          ></div>
+
+          <div class="result-message">
+            Enjoy your evening!
+          </div>
+
+        </div>
+
+
+        <button
+          class="button start-again"
+          id="startAgain"
+          onclick="startAgain()"
+        >
+          Search Another Name
+        </button>
+
+      </div>
+
+
+      <!-- Error -->
+
+      <div
+        class="error"
+        id="error"
+      ></div>
+
+
+      <div class="footer">
+        Your seating information is processed
+        directly in this browser.
+      </div>
+
+    </section>
+
   </main>
 
-<script>
-const seating = {'a': '1', 'b': '2', 'c': '3', 'd': '4', 'e': '5', 'f': '6', 'g': '7', 'h': '8'};
 
-function findTable(input) {
-  const cleaned = input.trim().toCaseFold ? input.trim().toCaseFold() : input.trim().toLowerCase();
-  return seating[cleaned];
-}
+  <script>
 
-document.getElementById("lookupForm").addEventListener("submit", function(event) {
-  event.preventDefault();
+    let seatingData = [];
 
-  const input = document.getElementById("nameInput").value;
-  const key = input.trim().toLowerCase();
-  const result = document.getElementById("result");
 
-  if (!key) {
-    result.innerHTML = '<div class="error">Please enter your name.</div>';
-    return;
-  }
+    /*
+     * ------------------------------
+     * Helpers
+     * ------------------------------
+     */
 
-  const table = seating[key];
+    function clean(value) {
 
-  if (table !== undefined) {
-    const displayName = input.trim().replace(/\s+/g, " ");
-    result.innerHTML = `
-      <div class="found">
-        <div class="name">Welcome, <strong>${escapeHtml(displayName)}</strong>!</div>
-        <div class="table">Table ${escapeHtml(String(table))}</div>
-      </div>`;
-  } else {
-    result.innerHTML = '<div class="error">Sorry, we couldn\'t find your name.<br>Please check the spelling and try again.</div>';
-  }
-});
+      if (
+        value === undefined ||
+        value === null
+      ) {
+        return "";
+      }
 
-function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, function(char) {
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[char];
-  });
-}
-</script>
+      return String(value).trim();
+    }
+
+
+    function normalise(value) {
+
+      return clean(value)
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+
+    }
+
+
+    /*
+     * ------------------------------
+     * Spreadsheet upload
+     * ------------------------------
+     */
+
+    document
+      .getElementById("fileInput")
+      .addEventListener(
+        "change",
+        handleFile
+      );
+
+
+    function handleFile(event) {
+
+      const file =
+        event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      document
+        .getElementById("fileName")
+        .textContent =
+        file.name;
+
+      hideError();
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(event) {
+
+          try {
+
+            const data =
+              new Uint8Array(
+                event.target.result
+              );
+
+            const workbook =
+              XLSX.read(
+                data,
+                {
+                  type: "array"
+                }
+              );
+
+
+            /*
+             * First worksheet.
+             */
+
+            const sheetName =
+              workbook.SheetNames[0];
+
+            const worksheet =
+              workbook.Sheets[
+                sheetName
+              ];
+
+
+            /*
+             * Convert Excel rows
+             * into JavaScript objects.
+             */
+
+            const rows =
+              XLSX.utils.sheet_to_json(
+                worksheet,
+                {
+                  defval: ""
+                }
+              );
+
+
+            if (!rows.length) {
+
+              showError(
+                "This spreadsheet appears to be empty."
+              );
+
+              return;
+            }
+
+
+            /*
+             * Find columns.
+             */
+
+            const columns =
+              Object.keys(rows[0]);
+
+
+            const nameColumn =
+              columns.find(
+                column =>
+                  normalise(column) ===
+                  "name"
+              );
+
+
+            const tableColumn =
+              columns.find(
+                column =>
+                  normalise(column) ===
+                  "table number"
+              );
+
+
+            if (
+              !nameColumn ||
+              !tableColumn
+            ) {
+
+              showError(
+                'Your spreadsheet must have columns named "Name" and "Table Number".'
+              );
+
+              return;
+            }
+
+
+            /*
+             * Store seating information.
+             */
+
+            seatingData =
+              rows
+                .map(row => ({
+
+                  name:
+                    clean(
+                      row[nameColumn]
+                    ),
+
+                  table:
+                    clean(
+                      row[tableColumn]
+                    )
+
+                }))
+                .filter(
+                  person =>
+                    person.name !== ""
+                );
+
+
+            if (
+              seatingData.length === 0
+            ) {
+
+              showError(
+                "No names were found in the spreadsheet."
+              );
+
+              return;
+            }
+
+
+            /*
+             * Switch from upload screen
+             * to guest search screen.
+             */
+
+            document
+              .getElementById(
+                "uploadSection"
+              )
+              .style.display =
+              "none";
+
+
+            document
+              .getElementById(
+                "searchSection"
+              )
+              .style.display =
+              "block";
+
+
+            document
+              .getElementById(
+                "nameInput"
+              )
+              .focus();
+
+
+          } catch (error) {
+
+            console.error(error);
+
+            showError(
+              "We couldn't read that file. Please upload a valid Excel or CSV spreadsheet."
+            );
+
+          }
+
+        };
+
+
+      reader.readAsArrayBuffer(file);
+
+    }
+
+
+    /*
+     * ------------------------------
+     * Live name search
+     * ------------------------------
+     */
+
+    document
+      .getElementById("nameInput")
+      .addEventListener(
+        "input",
+        handleSearch
+      );
+
+
+    function handleSearch() {
+
+      const input =
+        normalise(
+          document
+            .getElementById(
+              "nameInput"
+            )
+            .value
+        );
+
+
+      hideResult();
+      hideError();
+
+
+      if (!input) {
+
+        hideSuggestions();
+
+        return;
+      }
+
+
+      /*
+       * Find names that contain
+       * the typed text.
+       */
+
+      const matches =
+        seatingData
+          .filter(person =>
+            normalise(
+              person.name
+            ).includes(input)
+          )
+          .slice(0, 6);
+
+
+      if (!matches.length) {
+
+        hideSuggestions();
+
+        return;
+      }
+
+
+      const suggestions =
+        document
+          .getElementById(
+            "suggestions"
+          );
+
+
+      suggestions.innerHTML = "";
+
+
+      matches.forEach(
+        person => {
+
+          const item =
+            document.createElement(
+              "div"
+            );
+
+
+          item.className =
+            "suggestion";
+
+
+          item.textContent =
+            person.name;
+
+
+          item.onclick =
+            function() {
+
+              selectPerson(person);
+
+            };
+
+
+          suggestions.appendChild(
+            item
+          );
+
+        }
+      );
+
+
+      suggestions.style.display =
+        "block";
+
+    }
+
+
+    /*
+     * ------------------------------
+     * Select person
+     * ------------------------------
+     */
+
+    function selectPerson(person) {
+
+      document
+        .getElementById(
+          "nameInput"
+        )
+        .value =
+        person.name;
+
+
+      hideSuggestions();
+
+      showResult(person);
+
+    }
+
+
+    /*
+     * ------------------------------
+     * Show table
+     * ------------------------------
+     */
+
+    function showResult(person) {
+
+      document
+        .getElementById(
+          "resultName"
+        )
+        .textContent =
+        person.name;
+
+
+      document
+        .getElementById(
+          "tableNumber"
+        )
+        .textContent =
+        person.table;
+
+
+      document
+        .getElementById(
+          "result"
+        )
+        .style.display =
+        "block";
+
+    }
+
+
+    /*
+     * ------------------------------
+     * Search Another Name
+     * ------------------------------
+     */
+
+    function startAgain() {
+
+      document
+        .getElementById(
+          "nameInput"
+        )
+        .value = "";
+
+
+      hideResult();
+
+      hideSuggestions();
+
+      hideError();
+
+
+      document
+        .getElementById(
+          "nameInput"
+        )
+        .focus();
+
+    }
+
+
+    /*
+     * ------------------------------
+     * UI helpers
+     * ------------------------------
+     */
+
+    function hideSuggestions() {
+
+      document
+        .getElementById(
+          "suggestions"
+        )
+        .style.display =
+        "none";
+
+    }
+
+
+    function hideResult() {
+
+      document
+        .getElementById(
+          "result"
+        )
+        .style.display =
+        "none";
+
+    }
+
+
+    function showError(message) {
+
+      const error =
+        document
+          .getElementById(
+            "error"
+          );
+
+
+      error.textContent =
+        message;
+
+
+      error.style.display =
+        "block";
+
+    }
+
+
+    function hideError() {
+
+      document
+        .getElementById(
+          "error"
+        )
+        .style.display =
+        "none";
+
+    }
+
+
+    /*
+     * Close suggestions if the user
+     * clicks somewhere else.
+     */
+
+    document.addEventListener(
+      "click",
+      function(event) {
+
+        const searchBox =
+          document.querySelector(
+            ".search-box"
+          );
+
+
+        if (
+          !searchBox.contains(
+            event.target
+          )
+        ) {
+
+          hideSuggestions();
+
+        }
+
+      }
+    );
+
+  </script>
+
 </body>
 </html>
