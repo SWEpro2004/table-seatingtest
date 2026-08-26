@@ -120,6 +120,7 @@
       font-size: 65px;
       color: #a94b4b;
       font-weight: bold;
+      line-height: 1.1;
     }
 
     .error {
@@ -233,17 +234,18 @@
       /*
         Spreadsheet format:
 
-        First Name | Last Name | Table Number
-        John       | Smith     | 12
-        Sarah      | Jones     | 7
+        First Name | Last Name | Phone Number | Table Number
+        John       | Smith     | 0412 345 678 | 12
+        Sarah      | Jones     | 0423 456 789 | 7
       */
 
       const people = data
-        .filter(row => row.length >= 3)
+        .filter(row => row.length >= 4)
         .map(row => ({
           firstName: row[0].trim(),
           lastName: row[1].trim(),
-          tableNumber: row[2].trim()
+          phoneNumber: row[2].trim(),
+          tableNumber: row[3].trim()
         }));
 
       /*
@@ -282,36 +284,15 @@
         return;
       }
 
-      // Multiple matches - show all so the guest can self-identify
+      // Multiple matches - ask for phone number to disambiguate
       if (matches.length > 1) {
 
-        const tableList = matches
-          .map(person => `<div class="table-number">${escapeHTML(person.tableNumber)}</div>`)
-          .join("");
-
-        result.innerHTML = `
-          <div class="table-label">
-            We found a few matches — your table is one of these
-          </div>
-
-          ${tableList}
-        `;
-
+        showPhonePrompt(matches);
         return;
       }
 
       // One match
-      const person = matches[0];
-
-      result.innerHTML = `
-        <div class="table-label">
-          Your table is
-        </div>
-
-        <div class="table-number">
-          ${escapeHTML(person.tableNumber)}
-        </div>
-      `;
+      showTableResult(matches[0]);
 
     } catch (error) {
 
@@ -324,6 +305,122 @@
         '</div>';
 
     }
+  }
+
+
+  /*
+    When more than one person shares the same name,
+    ask for a phone number to narrow it down to one.
+  */
+
+  function showPhonePrompt(candidates) {
+
+    const result = document.getElementById("result");
+
+    result.innerHTML = `
+      <div class="instruction">
+        We found more than one match. Please enter your phone number too.
+      </div>
+
+      <input
+        type="tel"
+        id="phoneInput"
+        placeholder="Your phone number"
+        inputmode="numeric"
+        autocomplete="off"
+      >
+
+      <button id="phoneSubmit">
+        Find My Table
+      </button>
+
+      <div id="phoneResult"></div>
+    `;
+
+    const phoneInput = document.getElementById("phoneInput");
+    const phoneResult = document.getElementById("phoneResult");
+
+    function resolveByPhone() {
+
+      const searchPhone = phoneInput.value
+        .trim()
+        .replace(/\D/g, "");
+
+      if (!searchPhone) {
+        phoneResult.innerHTML =
+          '<div class="error">Please enter your phone number.</div>';
+        return;
+      }
+
+      const phoneMatches = candidates.filter(person => {
+
+        const phoneDigits =
+          person.phoneNumber.replace(/\D/g, "");
+
+        return (
+          phoneDigits === searchPhone ||
+          phoneDigits.endsWith(searchPhone)
+        );
+
+      });
+
+      if (phoneMatches.length === 0) {
+        phoneResult.innerHTML =
+          '<div class="error">' +
+          'That number doesn\'t match either record.<br>' +
+          'Please check the number and try again.' +
+          '</div>';
+        return;
+      }
+
+      // Still ambiguous even after phone match (rare) - show all
+      if (phoneMatches.length > 1) {
+
+        const tableList = phoneMatches
+          .map(person => `<div class="table-number">${escapeHTML(person.tableNumber)}</div>`)
+          .join("");
+
+        phoneResult.innerHTML = `
+          <div class="table-label">
+            Your table is one of these
+          </div>
+
+          ${tableList}
+        `;
+        return;
+      }
+
+      showTableResult(phoneMatches[0]);
+
+    }
+
+    document
+      .getElementById("phoneSubmit")
+      .addEventListener("click", resolveByPhone);
+
+    phoneInput.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        resolveByPhone();
+      }
+    });
+
+  }
+
+
+  function showTableResult(person) {
+
+    const result = document.getElementById("result");
+
+    result.innerHTML = `
+      <div class="table-label">
+        Your table is
+      </div>
+
+      <div class="table-number">
+        ${escapeHTML(person.tableNumber)}
+      </div>
+    `;
+
   }
 
 
