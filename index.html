@@ -282,14 +282,20 @@
         return;
       }
 
-      // Multiple matches
+      // Multiple matches - show all so the guest can self-identify
       if (matches.length > 1) {
 
-        result.innerHTML =
-          '<div class="error">' +
-          'We found more than one person with that name.<br>' +
-          'Please enter your first and last name.' +
-          '</div>';
+        const tableList = matches
+          .map(person => `<div class="table-number">${escapeHTML(person.tableNumber)}</div>`)
+          .join("");
+
+        result.innerHTML = `
+          <div class="table-label">
+            We found a few matches — your table is one of these
+          </div>
+
+          ${tableList}
+        `;
 
         return;
       }
