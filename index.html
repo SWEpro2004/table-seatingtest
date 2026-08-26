@@ -120,6 +120,7 @@
       font-size: 65px;
       color: #a94b4b;
       font-weight: bold;
+      line-height: 1.1;
     }
 
     .error {
@@ -301,17 +302,7 @@
       }
 
       // One match
-      const person = matches[0];
-
-      result.innerHTML = `
-        <div class="table-label">
-          Your table is
-        </div>
-
-        <div class="table-number">
-          ${escapeHTML(person.tableNumber)}
-        </div>
-      `;
+      showTableResult(matches[0]);
 
     } catch (error) {
 
@@ -324,6 +315,23 @@
         '</div>';
 
     }
+  }
+
+
+  function showTableResult(person) {
+
+    const result = document.getElementById("result");
+
+    result.innerHTML = `
+      <div class="table-label">
+        Your table is
+      </div>
+
+      <div class="table-number">
+        ${escapeHTML(person.tableNumber)}
+      </div>
+    `;
+
   }
 
 
